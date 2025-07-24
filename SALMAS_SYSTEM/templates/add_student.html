@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Student - SmartTuition System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🏫 SmartTuition System</h1>
+        <div class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/students">👥 Students</a>
+            <a href="/tuition">💰 Tuition</a>
+            <a href="/announcements">📢 Announcements</a>
+            <a href="/reports">📊 Reports</a>
+            <a href="/logout">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <div class="container fade-in">
+        <div class="card">
+            <h2 class="card-title">Add New Student</h2>
+            
+            <form method="POST" action="/save_student">
+                <div class="form-group">
+                    <label for="student_id">Student ID</label>
+                    <input type="text" id="student_id" name="student_id" placeholder="STU001" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="name">Student Name</label>
+                    <input type="text" id="name" name="name" placeholder="Full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="parent_name">Parent Name</label>
+                    <input type="text" id="parent_name" name="parent_name" placeholder="Parent's full name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="text" id="phone" name="phone" placeholder="+255123456789" required>
+                </div>
+                
+                <div class="flex-row" style="gap: 1rem;">
+                    <button type="submit">Save Student</button>
+                    <a href="/students" class="button button-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

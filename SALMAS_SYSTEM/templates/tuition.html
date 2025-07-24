@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tuition - SmartTuition System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    {{scripts}}
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🏫 SmartTuition System</h1>
+        <div class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/students">👥 Students</a>
+            <a href="/tuition">💰 Tuition</a>
+            <a href="/announcements">📢 Announcements</a>
+            <a href="/reports">📊 Reports</a>
+            <a href="/logout">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <div class="container fade-in">
+        <div class="card">
+            <div class="flex-row" style="justify-content: space-between; align-items: center;">
+                <h2 class="card-title">Tuition Payments</h2>
+                <a href="/add_tuition" class="button">➕ Record Payment</a>
+            </div>
+
+            <div class="stat-card" style="margin: 1rem 0; background-color: #e8f4fd;">
+                <h3>Total Collected</h3>
+                <p class="stat-number">{{total}}</p>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{content}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

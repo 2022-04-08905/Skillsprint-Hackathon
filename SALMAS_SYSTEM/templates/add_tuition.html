@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Tuition - SmartTuition System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🏫 SmartTuition System</h1>
+        <div class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/students">👥 Students</a>
+            <a href="/tuition">💰 Tuition</a>
+            <a href="/announcements">📢 Announcements</a>
+            <a href="/reports">📊 Reports</a>
+            <a href="/logout">🚪 Logout</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h2>➕ Record Tuition Payment</h2>
+        
+        <form method="POST" action="/save_tuition">
+            <input type="text" name="student_name" placeholder="Student Name" required>
+            <input type="number" name="amount" placeholder="Amount (TSh)" required step="1000">
+            <textarea name="notes" placeholder="Payment Notes"></textarea>
+            <button type="submit">Save Payment</button>
+        </form>
+        
+        <p><a href="/tuition">← Back to Tuition</a></p>
+    </div>
+</body>
+</html>

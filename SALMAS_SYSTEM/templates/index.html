@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - SmartTuition System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🏫 SmartTuition System</h1>
+        <div class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/students">👥 Students</a>
+            <a href="/tuition">💰 Tuition</a>
+            <a href="/announcements">📢 Announcements</a>
+            <a href="/reports">📊 Reports</a>
+            <a href="/logout">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <div class="container fade-in">
+        <div class="card">
+            <h2 class="card-title">Welcome, Salma Wamanga!</h2>
+            <p>Manage your students, track tuition payments, and communicate with parents.</p>
+        </div>
+
+        <div class="action-grid">
+            <a href="/add_student" class="card action-card">
+                <h3>➕ Add Student</h3>
+                <p>Register new student</p>
+            </a>
+            <a href="/add_tuition" class="card action-card">
+                <h3>💰 Record Payment</h3>
+                <p>Log tuition payment</p>
+            </a>
+            <a href="/add_announcement" class="card action-card">
+                <h3>📢 New Announcement</h3>
+                <p>Post class update</p>
+            </a>
+            <a href="/reports" class="card action-card">
+                <h3>📊 View Reports</h3>
+                <p>Check statistics</p>
+            </a>
+        </div>
+
+        <div class="card">
+            <h3 class="card-title">Recent Activity</h3>
+            <p>System is running smoothly. No recent alerts.</p>
+        </div>
+    </div>
+</body>
+</html>

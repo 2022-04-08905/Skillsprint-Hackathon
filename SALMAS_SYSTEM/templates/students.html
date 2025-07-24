@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students - SmartTuition System</title>
+    <link rel="stylesheet" href="/static/style.css">
+    {{scripts}}
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🏫 SmartTuition System</h1>
+        <div class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/students">👥 Students</a>
+            <a href="/tuition">💰 Tuition</a>
+            <a href="/announcements">📢 Announcements</a>
+            <a href="/reports">📊 Reports</a>
+            <a href="/logout">🚪 Logout</a>
+        </div>
+    </nav>
+
+    <div class="container fade-in">
+        <div class="card">
+            <div class="flex-row" style="justify-content: space-between; align-items: center;">
+                <h2 class="card-title">Student Management</h2>
+                <a href="/add_student" class="button">➕ Add Student</a>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Name</th>
+                        <th>Parent Name</th>
+                        <th>Phone</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{content}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

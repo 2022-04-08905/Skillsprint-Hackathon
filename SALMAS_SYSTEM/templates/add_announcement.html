@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Announcement - SmartTuition System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <h1>🏫 SmartTuition System</h1>
+        <div class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/students">👥 Students</a>
+            <a href="/tuition">💰 Tuition</a>
+            <a href="/announcements">📢 Announcements</a>
+            <a href="/reports">📊 Reports</a>
+            <a href="/logout">🚪 Logout</a>
+        </div>
+    </nav>
+    <div class="container">
+        <h2>📢 Add New Announcement</h2>
+        
+        <form method="POST" action="/save_announcement">
+            <input type="text" name="title" placeholder="Title" required>
+            <textarea name="content" placeholder="Content" required rows="5"></textarea>
+            <select name="priority">
+                <option value="High">High Priority</option>
+                <option value="Normal" selected>Normal Priority</option>
+                <option value="Low">Low Priority</option>
+            </select>
+            <button type="submit">Post Announcement</button>
+        </form>
+        
+        <p><a href="/announcements">← Back to Announcements</a></p>
+    </div>
+</body>
+</html>

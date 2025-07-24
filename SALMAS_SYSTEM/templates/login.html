@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - SmartTuition System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="login-body">
+    <div class="login-container fade-in">
+        <div class="text-center mb-3">
+            <h1 class="login-title">🏫 SmartTuition System</h1>
+            <h3>Teacher Portal</h3>
+        </div>
+        
+        <form method="POST" action="/login" class="login-form">
+            <div class="form-group">
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="form-group">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="button" style="width: 100%;">Login</button>
+        </form>
+        
+        {{error}}
+        
+        <div class="text-center mt-3" style="color: var(--gray-color); font-size: 0.9rem;">
+            <p>Default credentials: salma / pass123</p>
+        </div>
+    </div>
+</body>
+</html>
