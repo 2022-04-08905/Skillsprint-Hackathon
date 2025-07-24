@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Login - SmartTuition System</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="login-body">
+    <div class="login-container">
+        <h2>🏫 SmartTuition System</h2>
+        <h3>Login</h3>
+        <div class="tab-buttons">
+            <button type="button" onclick="showTab('student')" id="studentTab" class="active">Student</button>
+            <button type="button" onclick="showTab('admin')" id="adminTab">Admin</button>
+        </div>
+        <form method="POST" action="/login" class="login-form">
+            <div id="studentFields">
+                <input type="text" name="student_id" placeholder="Student ID">
+                <input type="password" name="phone" placeholder="Phone Number">
+            </div>
+            <div id="adminFields" style="display:none;">
+                <input type="text" name="username" placeholder="Admin Username">
+                <input type="password" name="password" placeholder="Admin Password">
+            </div>
+            <button type="submit">Login</button>
+        </form>
+        <p class="error">{{error}}</p>
+        <p class="info">Students: Use your Student ID and Phone Number.<br>Admins: Use your username and password.</p>
+    </div>
+    <script>
+    function showTab(tab) {
+        document.getElementById('studentFields').style.display = tab === 'student' ? '' : 'none';
+        document.getElementById('adminFields').style.display = tab === 'admin' ? '' : 'none';
+        document.getElementById('studentTab').classList.toggle('active', tab === 'student');
+        document.getElementById('adminTab').classList.toggle('active', tab === 'admin');
+    }
+    // Default to student tab
+    showTab('student');
+    </script>
+</body>
+</html>

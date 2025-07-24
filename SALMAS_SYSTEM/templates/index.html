@@ -1,53 +1,97 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - SmartTuition System</title>
+    <title>SmartTuition System - Home</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .home-hero {
+            background: linear-gradient(90deg, #3498db 0%, #8e44ad 100%);
+            color: white;
+            padding: 3rem 2rem 2rem 2rem;
+            border-radius: 0 0 30px 30px;
+            box-shadow: 0 4px 20px rgba(52,152,219,0.15);
+            text-align: center;
+        }
+        .home-hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .home-hero p {
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+        .home-actions {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .action-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            padding: 2rem 1.5rem;
+            min-width: 220px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .action-card:hover {
+            transform: translateY(-6px) scale(1.03);
+            box-shadow: 0 6px 24px rgba(52,152,219,0.18);
+        }
+        .action-card a {
+            display: block;
+            margin-top: 1rem;
+            font-weight: bold;
+            color: #3498db;
+            text-decoration: none;
+            font-size: 1.1rem;
+        }
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        @media (max-width: 700px) {
+            .home-actions {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <nav class="navbar">
-        <h1>🏫 SmartTuition System</h1>
-        <div class="nav-links">
-            <a href="/">🏠 Home</a>
-            <a href="/students">👥 Students</a>
-            <a href="/tuition">💰 Tuition</a>
-            <a href="/announcements">📢 Announcements</a>
-            <a href="/reports">📊 Reports</a>
-            <a href="/logout">🚪 Logout</a>
+    <div class="home-hero">
+        <h1>🏫 Welcome to SmartTuition System</h1>
+        <p>Effortlessly manage students, tuition payments, and school announcements.<br>
+        Your all-in-one dashboard for school administration.</p>
+    </div>
+    <div class="home-actions">
+        <div class="action-card">
+            <div class="action-icon">👥</div>
+            <div>Manage Students</div>
+            <a href="/students">Go to Students</a>
         </div>
-    </nav>
-
-    <div class="container fade-in">
-        <div class="card">
-            <h2 class="card-title">Welcome, Salma Wamanga!</h2>
-            <p>Manage your students, track tuition payments, and communicate with parents.</p>
+        <div class="action-card">
+            <div class="action-icon">💰</div>
+            <div>Tuition Payments</div>
+            <a href="/tuition">View Tuition</a>
         </div>
-
-        <div class="action-grid">
-            <a href="/add_student" class="card action-card">
-                <h3>➕ Add Student</h3>
-                <p>Register new student</p>
-            </a>
-            <a href="/add_tuition" class="card action-card">
-                <h3>💰 Record Payment</h3>
-                <p>Log tuition payment</p>
-            </a>
-            <a href="/add_announcement" class="card action-card">
-                <h3>📢 New Announcement</h3>
-                <p>Post class update</p>
-            </a>
-            <a href="/reports" class="card action-card">
-                <h3>📊 View Reports</h3>
-                <p>Check statistics</p>
-            </a>
+        <div class="action-card">
+            <div class="action-icon">📢</div>
+            <div>Announcements</div>
+            <a href="/announcements">See Announcements</a>
         </div>
-
-        <div class="card">
-            <h3 class="card-title">Recent Activity</h3>
-            <p>System is running smoothly. No recent alerts.</p>
+        <div class="action-card">
+            <div class="action-icon">📊</div>
+            <div>Reports & Stats</div>
+            <a href="/reports">View Reports</a>
         </div>
     </div>
+    <footer style="text-align:center; margin-top:3rem; color:#888;">
+        &copy; 2025 SmartTuition System. All rights reserved.
+    </footer>
 </body>
 </html>

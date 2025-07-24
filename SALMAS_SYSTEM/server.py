@@ -13,12 +13,142 @@ USERNAME = "salma"
 PASSWORD = "pass123"
 
 class SimpleTeacherSystem(BaseHTTPRequestHandler):
+    def ensure_student_surnames(self):
+        """Ensure all students have their surname set (last word of name)."""
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+        cur.execute("PRAGMA table_info(students)")
+        columns = [row[1] for row in cur.fetchall()]
+        if 'surname' not in columns:
+            cur.execute("ALTER TABLE students ADD COLUMN surname TEXT")
+            conn.commit()
+        cur.execute("SELECT id, name, surname FROM students")
+        for row in cur.fetchall():
+            sid, name, surname = row
+            if (not surname or surname.strip() == '') and name:
+                surname_val = name.strip().split()[-1]
+                cur.execute("UPDATE students SET surname = ? WHERE id = ?", (surname_val, sid))
+        conn.commit()
+        conn.close()
+    def is_student_authenticated(self):
+        if "Cookie" in self.headers:
+            cookie = http.cookies.SimpleCookie(self.headers["Cookie"])
+            return cookie.get("student_logged_in") and cookie["student_logged_in"].value == "yes"
+        return False
+
+    # Duplicate do_GET and do_POST removed above; only the full-featured versions below are kept
+    def render_student_login(self, error=""):
+        try:
+            with open("templates/student_login.html", "r", encoding="utf-8") as f:
+                html = f.read().replace("{{error}}", error)
+                self.respond(html)
+        except FileNotFoundError:
+            login_html = f"""
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Student Login - SmartTuition System</title>
+                <link rel=\"stylesheet\" href=\"/static/style.css\">
+            </head>
+            <body class=\"login-body\">
+                <div class=\"login-container\">
+                    <h2>🏫 SmartTuition System</h2>
+                    <h3>Student Login</h3>
+                    <form method=\"POST\" action=\"/student_login\" class=\"login-form\">
+                        <input type=\"text\" name=\"student_id\" placeholder=\"Student ID\" required>
+                        <input type=\"password\" name=\"phone\" placeholder=\"Phone Number\" required>
+                        <button type=\"submit\">Login</button>
+                    </form>
+                    <p class=\"error\">{error}</p>
+                </div>
+            </body>
+            </html>
+            """
+            self.respond(login_html)
+
+    # handle_unified_login removed; only admin login is supported now
+
+    def show_student_dashboard(self):
+        # Get student_id from cookie
+        cookie = http.cookies.SimpleCookie(self.headers.get("Cookie", ""))
+        student_id = cookie.get("student_id")
+        if not student_id:
+            self.redirect("/student_login")
+            return
+        student_id = student_id.value
+        # Get announcements
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+        cur.execute("SELECT title, content, date, priority FROM announcements ORDER BY date DESC")
+        announcements = cur.fetchall()
+        # Get tuition payments for this student
+        cur.execute("SELECT amount, date, notes FROM tuition WHERE student_name = (SELECT name FROM students WHERE student_id = ?) ORDER BY date DESC", (student_id,))
+        payments = cur.fetchall()
+        conn.close()
+        # Build HTML
+        ann_rows = "".join([
+            f"<tr><td>{a[0]}</td><td>{a[1]}</td><td>{a[2]}</td><td>{a[3]}</td></tr>" for a in announcements
+        ]) or "<tr><td colspan='4'>No announcements yet.</td></tr>"
+        pay_rows = "".join([
+            f"<tr><td>TSh {p[0]:,}</td><td>{p[1]}</td><td>{p[2]}</td></tr>" for p in payments
+        ]) or "<tr><td colspan='3'>No payments yet.</td></tr>"
+        dashboard_html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Student Dashboard</title>
+            <link rel=\"stylesheet\" href=\"/static/style.css\">
+        </head>
+        <body>
+            <nav class=\"navbar\">
+                <h1>🏫 SmartTuition System</h1>
+                <div class=\"nav-links\">
+                    <a href=\"/student_dashboard\">Dashboard</a>
+                    <a href=\"/student_logout\">Logout</a>
+                </div>
+            </nav>
+            <div class=\"container fade-in\">
+                <div class=\"card\">
+                    <h2 class=\"card-title\">📢 Announcements</h2>
+                    <table><thead><tr><th>Title</th><th>Content</th><th>Date</th><th>Priority</th></tr></thead><tbody>{ann_rows}</tbody></table>
+                </div>
+                <div class=\"card\">
+                    <h2 class=\"card-title\">💰 Your Tuition Receipts</h2>
+                    <table><thead><tr><th>Amount</th><th>Date</th><th>Notes</th></tr></thead><tbody>{pay_rows}</tbody></table>
+                </div>
+            </div>
+        </body>
+        </html>
+        """
+        self.respond(dashboard_html)
+
+    # Remove duplicate do_GET above. Student logout route is already handled in main do_GET after path is defined.
     
     def is_authenticated(self):
         """Check if user is logged in via cookies"""
+        print("\n=== CHECKING AUTH ===")
+        print(f"Headers: {self.headers}")
+        
         if "Cookie" in self.headers:
-            cookie = http.cookies.SimpleCookie(self.headers["Cookie"])
-            return cookie.get("logged_in") and cookie["logged_in"].value == "yes"
+            try:
+                cookie_str = self.headers["Cookie"]
+                print(f"Raw cookie string: {cookie_str}")
+                
+                # Parse cookies manually
+                cookies = dict(pair.split('=') for pair in cookie_str.split('; '))
+                print(f"Parsed cookies: {cookies}")
+                
+                if 'logged_in' in cookies:
+                    is_auth = cookies['logged_in'] == 'yes'
+                    print(f"logged_in cookie found: {cookies['logged_in']}")
+                    print(f"Is authenticated: {is_auth}")
+                    return is_auth
+                else:
+                    print("logged_in cookie not found")
+            except Exception as e:
+                print(f"Error parsing cookie: {str(e)}")
+                
+        print("No valid authentication cookie found")
         return False
     
     def do_GET(self):
@@ -27,8 +157,13 @@ class SimpleTeacherSystem(BaseHTTPRequestHandler):
         path = parsed_path.path
         query = parse_qs(parsed_path.query)
         
+        print(f"\n=== GET Request ===")
+        print(f"Path: {path}")
+        print(f"Headers: {self.headers}")
+        
         # Public routes (no authentication required)
         if path == '/login':
+            print("Rendering login page")
             self.render_login()
             return
         elif path == '/logout':
@@ -39,6 +174,9 @@ class SimpleTeacherSystem(BaseHTTPRequestHandler):
             return
         elif path == '/api/students' and self.is_authenticated():
             self.api_get_students()
+            return
+        elif path == '/api/tuition_stats' and self.is_authenticated():
+            self.api_tuition_stats()
             return
             
         # Protected routes (authentication required)
@@ -56,7 +194,7 @@ class SimpleTeacherSystem(BaseHTTPRequestHandler):
         elif path == '/edit_student':
             self.edit_student(query.get('id', [None])[0])
         elif path == '/tuition':
-            self.render_template("tuition.html")
+            self.show_tuition()
         elif path == '/add_tuition':
             self.render_template("add_tuition.html")
         elif path == '/announcements':
@@ -64,21 +202,20 @@ class SimpleTeacherSystem(BaseHTTPRequestHandler):
         elif path == '/add_announcement':
             self.render_template("add_announcement.html")
         elif path == '/reports':
-            self.show_reports("reports.html")
+            self.show_reports()
+        elif path == '/save_student':
+            self.redirect("/students")
         else:
             self.send_error(404, "Page Not Found")
 
     def do_POST(self):
-        # Public POST routes
+        # Only /login is public, all others require authentication
         if self.path == '/login':
             self.handle_login()
             return
-            
-        # Protected POST routes
         if not self.is_authenticated():
             self.redirect("/login")
             return
-            
         if self.path == '/save_student':
             self.save_student()
         elif self.path == '/update_student':
@@ -87,8 +224,12 @@ class SimpleTeacherSystem(BaseHTTPRequestHandler):
             self.delete_student()
         elif self.path == '/save_tuition':
             self.save_tuition()
+        elif self.path == '/delete_tuition':
+            self.delete_tuition()
         elif self.path == '/save_announcement':
             self.save_announcement()
+        elif self.path == '/delete_announcement':
+            self.delete_announcement()
         else:
             self.send_error(404, "Page Not Found")
 
@@ -99,22 +240,45 @@ class SimpleTeacherSystem(BaseHTTPRequestHandler):
         data = self.rfile.read(length).decode()
         params = parse_qs(data)
         
-        username = params.get('username', [''])[0].strip()
-        password = params.get('password', [''])[0].strip()
+        print("\n=== LOGIN ATTEMPT ===")
+        print(f"Headers: {self.headers}")
+        print(f"Form data: {params}")
+        print(f"Raw data: {data}")
+        
+        username = params.get('user_id', [''])[0].strip()
+        password = params.get('user_password', [''])[0].strip()
+        
+        print(f"\nReceived credentials:")
+        print(f"Username: {username}")
+        print(f"Password length: {len(password)}")
+        
+        print(f"\nExpected credentials:")
+        print(f"Username: {USERNAME}")
+        print(f"Password length: {len(PASSWORD)}")
         
         if username == USERNAME and password == PASSWORD:
-            # Set login cookie and redirect to home
+            print("\n✓ Admin login successful!")
+            # Set a simple cookie string instead of using SimpleCookie
+            cookie_str = "logged_in=yes; Path=/; HttpOnly; Max-Age=3600; SameSite=Lax"
+            print(f"Setting cookie header: {cookie_str}")
+            
             self.send_response(302)
-            self.send_header("Set-Cookie", "logged_in=yes; Max-Age=3600; Path=/")
+            self.send_header("Set-Cookie", cookie_str)
             self.send_header("Location", "/")
             self.end_headers()
-        else:
-            self.render_login(error="❌ Invalid username or password!")
+            print("Headers sent, redirecting to /")
+            return
+            
+        print("\n✗ Login failed - Invalid credentials")
+        print(f"Username match: {username == USERNAME}")
+        print(f"Password match: {password == PASSWORD}")
+        self.render_login(error="❌ Invalid username or password!")
 
     def logout(self):
         """Handle logout"""
         self.send_response(302)
-        self.send_header("Set-Cookie", "logged_in=no; Max-Age=0; Path=/")
+        # Expire the cookie immediately and ensure it's removed
+        self.send_header("Set-Cookie", "logged_in=no; Path=/; Max-Age=0; Expires=Thu, 01 Jan 1970 00:00:00 GMT")
         self.send_header("Location", "/login")
         self.end_headers()
 
@@ -200,26 +364,30 @@ class SimpleTeacherSystem(BaseHTTPRequestHandler):
     def save_student(self):
         """Save new student to database"""
         params = self.get_post_params()
-        
-        student_id = params.get("student_id", "").strip().upper()
-        name = params.get("name", "").strip()
-        parent_name = params.get("parent_name", "").strip()
-        phone = params.get("phone", "").strip()
+        student_id = params.get("student_id", [""])[0].strip().upper()
+        name = params.get("name", [""])[0].strip()
+        parent_name = params.get("parent_name", [""])[0].strip()
+        phone = params.get("phone", [""])[0].strip()
 
-        conn = sqlite3.connect("database.db")
-        cur = conn.cursor()
         try:
-            cur.execute("""
-                INSERT INTO students (student_id, name, parent_name, phone)
-                VALUES (?, ?, ?, ?)
-            """, (student_id, name, parent_name, phone))
-            conn.commit()
-            conn.close()
-            self.redirect("/students")
+            with sqlite3.connect("database.db") as conn:
+                cur = conn.cursor()
+                cur.execute("""
+                    INSERT INTO students (student_id, name, parent_name, phone)
+                    VALUES (?, ?, ?, ?)
+                """, (student_id, name, parent_name, phone))
+                conn.commit()
+            # Immediately show updated students list after recording
+            self.show_students()
         except sqlite3.IntegrityError:
-            conn.close()
             self.respond("""
                 <h1>❌ Student ID already exists!</h1>
+                <p><a href='/students'>← Back to Students</a></p>
+            """)
+        except Exception as e:
+            self.respond(f"""
+                <h1>❌ Error saving student!</h1>
+                <p>{str(e)}</p>
                 <p><a href='/students'>← Back to Students</a></p>
             """)
 
@@ -233,19 +401,17 @@ class SimpleTeacherSystem(BaseHTTPRequestHandler):
         phone = params.get("phone", "").strip()
         id = params.get("id", "")
 
-        conn = sqlite3.connect("database.db")
-        cur = conn.cursor()
         try:
-            cur.execute("""
-                UPDATE students 
-                SET student_id = ?, name = ?, parent_name = ?, phone = ?
-                WHERE id = ?
-            """, (student_id, name, parent_name, phone, id))
-            conn.commit()
-            conn.close()
+            with sqlite3.connect("database.db") as conn:
+                cur = conn.cursor()
+                cur.execute("""
+                    UPDATE students 
+                    SET student_id = ?, name = ?, parent_name = ?, phone = ?
+                    WHERE id = ?
+                """, (student_id, name, parent_name, phone, id))
+                conn.commit()
             self.redirect("/students")
-        except sqlite3.Error as e:
-            conn.close()
+        except Exception as e:
             self.respond(f"""
                 <h1>❌ Error updating student!</h1>
                 <p>{str(e)}</p>
@@ -311,20 +477,28 @@ class SimpleTeacherSystem(BaseHTTPRequestHandler):
         """Save tuition payment to database"""
         params = self.get_post_params()
         
-        student_name = params.get("student_name", "").strip()
-        amount = float(params.get("amount", "0"))
-        notes = params.get("notes", "").strip()
+        student_name = params.get("student_name", [""])[0].strip()
+
+        amount = float(params.get("amount", ["0"])[0])
+        notes = params.get("notes", [""])[0].strip()
+
         date = datetime.now().strftime("%Y-%m-%d")
 
-        conn = sqlite3.connect("database.db")
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO tuition (student_name, amount, date, notes)
-            VALUES (?, ?, ?, ?)
-        """, (student_name, amount, date, notes))
-        conn.commit()
-        conn.close()
-        self.redirect("/tuition")
+        try:
+            with sqlite3.connect("database.db") as conn:
+                cur = conn.cursor()
+                cur.execute("""
+                    INSERT INTO tuition (student_name, amount, date, notes)
+                    VALUES (?, ?, ?, ?)
+                """, (student_name, amount, date, notes))
+                conn.commit()
+            self.redirect("/tuition")
+        except Exception as e:
+            self.respond(f"""
+                <h1>❌ Error saving tuition!</h1>
+                <p>{str(e)}</p>
+                <p><a href='/tuition'>← Back to Tuition</a></p>
+            """)
 
     # Announcement methods
     def show_announcements(self):
@@ -362,21 +536,27 @@ class SimpleTeacherSystem(BaseHTTPRequestHandler):
     def save_announcement(self):
         """Save announcement to database"""
         params = self.get_post_params()
-        
-        title = params.get("title", "").strip()
-        content = params.get("content", "").strip()
-        priority = params.get("priority", "Normal")
+        title = params.get("title", [""])[0].strip()
+        content = params.get("content", [""])[0].strip()
+        priority = params.get("priority", ["Normal"])[0]
         date = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-        conn = sqlite3.connect("database.db")
-        cur = conn.cursor()
-        cur.execute("""
-            INSERT INTO announcements (title, content, date, priority)
-            VALUES (?, ?, ?, ?)
-        """, (title, content, date, priority))
-        conn.commit()
-        conn.close()
-        self.redirect("/announcements")
+        try:
+            with sqlite3.connect("database.db") as conn:
+                cur = conn.cursor()
+                cur.execute("""
+                    INSERT INTO announcements (title, content, date, priority)
+                    VALUES (?, ?, ?, ?)
+                """, (title, content, date, priority))
+                conn.commit()
+            # Immediately show updated announcements list after recording
+            self.show_announcements()
+        except Exception as e:
+            self.respond(f"""
+                <h1>❌ Error saving announcement!</h1>
+                <p>{str(e)}</p>
+                <p><a href='/announcements'>← Back to Announcements</a></p>
+            """)
 
     # Report methods
     def show_reports(self):
@@ -500,10 +680,10 @@ class SimpleTeacherSystem(BaseHTTPRequestHandler):
             <body class="login-body">
                 <div class="login-container">
                     <h2>🏫 SmartTuition System</h2>
-                    <h3>Login</h3>
+                    <h3>Admin Login</h3>
                     <form method="POST" action="/login" class="login-form">
-                        <input type="text" name="username" placeholder="Username" required>
-                        <input type="password" name="password" placeholder="Password" required>
+                        <input type="text" name="user_id" placeholder="Username" required>
+                        <input type="password" name="user_password" placeholder="Password" required>
                         <button type="submit">Login</button>
                     </form>
                     <p class="error">{error}</p>
@@ -539,6 +719,47 @@ class SimpleTeacherSystem(BaseHTTPRequestHandler):
         self.send_response(302)
         self.send_header("Location", location)
         self.end_headers()
+
+    def delete_tuition(self):
+        """Delete a tuition payment record"""
+        params = self.get_post_params()
+        tuition_id = params.get("id", "")
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+        try:
+            cur.execute("DELETE FROM tuition WHERE id = ?", (tuition_id,))
+            conn.commit()
+            conn.close()
+            self.send_json({"success": True})
+        except sqlite3.Error as e:
+            conn.close()
+            self.send_json({"success": False, "error": str(e)})
+
+    def delete_announcement(self):
+        """Delete an announcement"""
+        params = self.get_post_params()
+        announcement_id = params.get("id", "")
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+        try:
+            cur.execute("DELETE FROM announcements WHERE id = ?", (announcement_id,))
+            conn.commit()
+            conn.close()
+            self.send_json({"success": True})
+        except sqlite3.Error as e:
+            conn.close()
+            self.send_json({"success": False, "error": str(e)})
+
+    def api_tuition_stats(self):
+        """API endpoint for tuition chart data"""
+        conn = sqlite3.connect("database.db")
+        cur = conn.cursor()
+        cur.execute("SELECT student_name, SUM(amount) FROM tuition GROUP BY student_name")
+        data = cur.fetchall()
+        conn.close()
+        labels = [row[0] for row in data]
+        amounts = [row[1] for row in data]
+        self.send_json({"labels": labels, "amounts": amounts})
 
 def init_db():
     """Initialize SQLite database with all required tables"""

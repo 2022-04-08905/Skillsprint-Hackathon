@@ -1,0 +1,11 @@
+version: '3.8'
+services:
+  smarttuition:
+    build: .
+    container_name: smarttuition
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    working_dir: /app
+    command: python server.py

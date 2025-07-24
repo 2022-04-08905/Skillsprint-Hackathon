@@ -7,27 +7,30 @@
     <link rel="stylesheet" href="/static/style.css">
 </head>
 <body class="login-body">
-    <div class="login-container fade-in">
+    <div class="login-container fade-in" style="max-width: 370px; margin: 5vh auto; background: #fff; border-radius: 12px; box-shadow: 0 2px 16px #0001; padding: 2.5rem 2rem 2rem 2rem;">
         <div class="text-center mb-3">
-            <h1 class="login-title">🏫 SmartTuition System</h1>
-            <h3>Teacher Portal</h3>
+            <h1 class="login-title" style="font-size: 2rem; margin-bottom: 0.5rem; color: #3a4fcf;">🏫 SmartTuition</h1>
+            <div style="font-size: 1.1rem; color: #444; margin-bottom: 1.5rem;">Sign in to your account</div>
         </div>
-        
-        <form method="POST" action="/login" class="login-form">
-            <div class="form-group">
-                <input type="text" name="username" placeholder="Username" required>
+        <form method="POST" action="/login" class="login-form" autocomplete="off">
+            <div class="form-group" style="margin-bottom: 1.2rem;">
+                <input type="text" name="user_id" placeholder="Registration Number or Username" required style="width: 100%; padding: 0.7rem; border-radius: 6px; border: 1px solid #d0d0e0; font-size: 1rem;">
             </div>
-            <div class="form-group">
-                <input type="password" name="password" placeholder="Password" required>
+            <div class="form-group" style="margin-bottom: 1.2rem;">
+                <input type="password" name="user_password" placeholder="Password" required style="width: 100%; padding: 0.7rem; border-radius: 6px; border: 1px solid #d0d0e0; font-size: 1rem;">
             </div>
-            <button type="submit" class="button" style="width: 100%;">Login</button>
+            <button type="submit" class="button" style="width: 100%; padding: 0.7rem; font-size: 1.1rem; background: #3a4fcf; color: #fff; border: none; border-radius: 6px;">Login</button>
         </form>
-        
-        {{error}}
-        
-        <div class="text-center mt-3" style="color: var(--gray-color); font-size: 0.9rem;">
-            <p>Default credentials: salma / pass123</p>
-        </div>
     </div>
+    <script>
+    function showTab(tab) {
+        document.getElementById('studentFields').style.display = tab === 'student' ? '' : 'none';
+        document.getElementById('adminFields').style.display = tab === 'admin' ? '' : 'none';
+        document.getElementById('studentTab').classList.toggle('active', tab === 'student');
+        document.getElementById('adminTab').classList.toggle('active', tab === 'admin');
+    }
+    // Default to student tab
+    showTab('student');
+    </script>
 </body>
 </html>
